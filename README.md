@@ -75,18 +75,45 @@ docker pull YOUR_DOCKERHUB_USERNAME/react-counter-app:latest
 docker run -d -p 8080:80 YOUR_DOCKERHUB_USERNAME/react-counter-app:latest
 ```
 
-## Quick Demo Commands
+## CI/CD Deployment to AWS EC2
 
-```bash
-# Build, run, and test locally
-docker build -t react-counter-app . && docker run -d -p 8080:80 react-counter-app
+This project uses **Jenkins** for automated deployment to AWS EC2.
 
-# Stop and remove container
-docker stop counter-app && docker rm counter-app
+### Pipeline Overview
 
-# View logs
-docker logs counter-app
+The Jenkins pipeline (`Jenkinsfile`) automatically:
+1. Builds the Docker image using multi-stage build
+2. Pushes to Docker Hub (`sofiavistas/react-counter-app:latest`)
+3. Deploys to EC2 server using SSH
+
+### Prerequisites
+
+- **Jenkins** with the SSH Agent plugin installed
+- **EC2 instance** with Docker installed
+- **Jenkins credentials** configured:
+  - `github-credentials`: GitHub access token
+  - `dockerhub-credentials`: Docker Hub login (used by shared library)
+  - `ec2-server-credentials`: SSH private key for EC2 access
+
+### Deployment Process
+
+The `script.groovy` uses Jenkins' `sshagent` to deploy to EC2:
+
+```groovy
+sshagent(['ec2-server-credentials']) {
+    sh "ssh -o StrictHostKeyChecking=no ec2-user@YOUR_EC2_IP '${dockerCmd}'"
+}
 ```
+
+### EC2 Security Group
+
+Ensure your EC2 security group allows:
+- **Port 8080** (inbound) - for web access
+- **Port 22** (inbound) - for SSH from Jenkins server
+
+### Access the App
+
+After deployment, access at: `http://YOUR_EC2_IP:8080`
 
 ## Project Structure
 
@@ -101,16 +128,11 @@ react-counter-app/
 ├── package.json         # Dependencies
 ├── vite.config.js       # Vite configuration
 ├── Dockerfile           # Multi-stage Docker build
-├── .dockerignore        # Docker ignore rules
-└── README.md           # This file
+├── Jenkinsfile          # CI/CD pipeline definition
+├── script.groovy        # Jenkins deployment script
+└── README.md            # This file
 ```
 
-## Technologies Used
-
-- **React 18** - UI library
-- **Vite** - Build tool and dev server
-- **Docker** - Containerization
-- **Nginx** - Production web server
 
 ## License
 
