@@ -10,6 +10,9 @@ def deployApp() {
         docker stop react-counter-app 2>/dev/null || true
         docker rm react-counter-app 2>/dev/null || true
         
+        # Remove old image to force fresh pull
+        docker rmi sofiavistas/react-counter-app:latest 2>/dev/null || true
+        
         # Pull latest image and run
         docker pull sofiavistas/react-counter-app:latest
         docker run -d -p 8080:80 --name react-counter-app sofiavistas/react-counter-app:latest
