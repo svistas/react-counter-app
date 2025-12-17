@@ -31,9 +31,6 @@ function App() {
             + Increment
           </button>
         </div>
-        <div className="info">
-          <p>A simple counter demo built with React</p>
-        </div>
       </div>
     </div>
   )
